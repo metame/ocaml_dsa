@@ -1,0 +1,8 @@
+(library
+ (name dsa)
+ (modules dsa))
+
+(library
+ (package dsa)
+ (name pqueue)
+ (modules pqueue))
