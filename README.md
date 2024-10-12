@@ -2,7 +2,7 @@
 
 ## What you got?
 
-So far a fixed-length Priority Queue backed by a d-ary max heap (backed by an `Array.t`).
+So far a fixed-length *mutable* Priority Queue backed by a d-ary max heap (backed by an `Array.t`).
 
 ## Why OCaml?
 
