@@ -5,7 +5,7 @@ type 'a t = {
   mutable length : int;
 }
 
-let children d i = List.init d (fun o -> (i * 2) + 1 + o)
+let children d i = List.init d (fun o -> (i * d) + 1 + o)
 let parent d i = (i - 1) / d
 
 let priority_of_index { arr; length; priority_fn; _ } i =
