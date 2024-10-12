@@ -1,8 +1,8 @@
 type 'a t = {
-    d : int;
-    arr : 'a option array;
-    priority_fn : 'a -> int;
-    mutable length : int;
+  d : int;
+  arr : 'a option array;
+  priority_fn : 'a -> int;
+  mutable length : int;
 }
 
 let children d i = List.init d (fun o -> (i * 2) + 1 + o)
@@ -33,24 +33,24 @@ let push_down ({ arr; length; priority_fn; d } as pq) i =
   arr.(!i) <- v
 
 let bubble_up { arr; priority_fn; d; _ } i =
-  if i > 0
-  then begin
-      let v = arr.(i) in
-      let priority = priority_fn (Option.get v) in
-      let i = ref i in
-      let continue = ref true in
-      while !i > 0 && !continue do
-        let parent_index = parent d !i in
-        let parent = arr.(parent_index) in
-        if priority > priority_fn (Option.get parent)
-        then (arr.(!i) <- parent;
-              i := parent_index)
-        else continue := false
-      done;
-      arr.(!i) <- v
-    end
+  if i > 0 then begin
+    let v = arr.(i) in
+    let priority = priority_fn (Option.get v) in
+    let i = ref i in
+    let continue = ref true in
+    while !i > 0 && !continue do
+      let parent_index = parent d !i in
+      let parent = arr.(parent_index) in
+      if priority > priority_fn (Option.get parent) then (
+        arr.(!i) <- parent;
+        i := parent_index)
+      else continue := false
+    done;
+    arr.(!i) <- v
+  end
 
-let make d cap priority_fn = { d; arr = Array.make cap None; length = 0; priority_fn }
+let make d cap priority_fn =
+  { d; arr = Array.make cap None; length = 0; priority_fn }
 
 let peak { arr; length; _ } = if length = 0 then None else arr.(0)
 
@@ -68,9 +68,8 @@ let top ({ arr; length; _ } as pq) =
       t
 
 let insert ({ arr; length; _ } as pq) x =
-  if length <> Array.length arr
-  then begin
-      arr.(length) <- (Some x);
-      pq.length <- length + 1;
-      bubble_up pq length
-    end
+  if length <> Array.length arr then begin
+    arr.(length) <- Some x;
+    pq.length <- length + 1;
+    bubble_up pq length
+  end
