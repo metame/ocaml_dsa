@@ -17,17 +17,17 @@ let push_down ({ arr; length; priority_fn; d } as pq) i =
   let i = ref i in
   let continue = ref true in
   while !i < length - 1 && !continue do
-    let cis = children d !i in
+    let children_is = children d !i in
     let cipris =
       List.filter_map
         (fun i -> Option.map (fun p -> (p, i)) (priority_of_index pq i))
-        cis
+        children_is
     in
     let cipris = List.sort (fun (a, _) (b, _) -> Int.compare b a) cipris in
     match cipris with
-    | (pri, ci) :: _ when priority < pri ->
-        arr.(!i) <- arr.(ci);
-        i := ci
+    | (child_priority, child_index) :: _ when priority < child_priority ->
+        arr.(!i) <- arr.(child_index);
+        i := child_index
     | _ -> continue := false
   done;
   arr.(!i) <- v
@@ -40,11 +40,11 @@ let bubble_up { arr; priority_fn; d; _ } i =
       let i = ref i in
       let continue = ref true in
       while !i > 0 && !continue do
-        let pi = parent d !i in
-        let p = arr.(pi) in
-        if priority > priority_fn (Option.get p)
-        then (arr.(!i) <- p;
-              i := pi)
+        let parent_index = parent d !i in
+        let parent = arr.(parent_index) in
+        if priority > priority_fn (Option.get parent)
+        then (arr.(!i) <- parent;
+              i := parent_index)
         else continue := false
       done;
       arr.(!i) <- v
