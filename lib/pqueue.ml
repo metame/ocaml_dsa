@@ -5,16 +5,14 @@ type 'a t = {
     mutable length : int;
 }
 
-let make d cap priority_fn = { d; arr = Array.make cap None; length = 0; priority_fn }
-let peak { arr; length; _ } = if length = 0 then None else Some (Array.get arr 0)
 let children d i = List.init d (fun o -> (i * 2) + 1 + o)
 let parent d i = (i - 1) / d
 
 let priority_of_index { arr; length; priority_fn; _ } i =
-  if i < length then Option.map priority_fn (Array.get arr i) else None
+  if i < length then Option.map priority_fn arr.(i) else None
 
 let push_down ({ arr; length; priority_fn; d } as pq) i =
-  let v = Array.get arr i in
+  let v = arr.(i) in
   let priority = priority_fn (Option.get v) in
   let i = ref i in
   let continue = ref true in
@@ -28,44 +26,51 @@ let push_down ({ arr; length; priority_fn; d } as pq) i =
     let cipris = List.sort (fun (a, _) (b, _) -> Int.compare b a) cipris in
     match cipris with
     | (pri, ci) :: _ when priority < pri ->
-        Array.set arr !i @@ Array.get arr ci;
+        arr.(!i) <- arr.(ci);
         i := ci
     | _ -> continue := false
   done;
-  Array.set arr !i v
+  arr.(!i) <- v
 
 let bubble_up { arr; priority_fn; d; _ } i =
   if i > 0
-  then
-  (let v = Array.get arr i in
-   let priority = priority_fn (Option.get v) in
-   let i = ref i in
-   let continue = ref true in
-   while !i > 0 && !continue do
-     let pi = parent d !i in
-     let p = Array.get arr pi in
-     if priority > priority_fn (Option.get p) then
-       let _ = Array.set arr !i p in
-       i := pi
-     else continue := false
-   done;
-   Array.set arr !i v)
+  then begin
+      let v = arr.(i) in
+      let priority = priority_fn (Option.get v) in
+      let i = ref i in
+      let continue = ref true in
+      while !i > 0 && !continue do
+        let pi = parent d !i in
+        let p = arr.(pi) in
+        if priority > priority_fn (Option.get p)
+        then (arr.(!i) <- p;
+              i := pi)
+        else continue := false
+      done;
+      arr.(!i) <- v
+    end
+
+let make d cap priority_fn = { d; arr = Array.make cap None; length = 0; priority_fn }
+
+let peak { arr; length; _ } = if length = 0 then None else arr.(0)
 
 let top ({ arr; length; _ } as pq) =
   match length with
   | 0 -> None
   | 1 ->
       pq.length <- length - 1;
-      Array.get arr 0
+      arr.(0)
   | _ ->
       pq.length <- length - 1;
-      let t = Array.get arr 0 in
-      Array.set arr 0 (Array.get arr (length - 1));
+      let t = arr.(0) in
+      arr.(0) <- arr.(length - 1);
       push_down pq 0;
       t
 
 let insert ({ arr; length; _ } as pq) x =
   if length <> Array.length arr
-  then (Array.set arr length (Some x);
-        pq.length <- length + 1;
-        bubble_up pq length)
+  then begin
+      arr.(length) <- (Some x);
+      pq.length <- length + 1;
+      bubble_up pq length
+    end
